@@ -9,7 +9,7 @@
       <slot v-bind:on="on"></slot>
     </template>
     <v-card>
-      <v-toolbar dark color="teal">
+      <v-toolbar dark color="primary">
         <v-btn icon dark @click="show = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -78,7 +78,7 @@
             <v-col cols="12">
               <v-btn
                 class="white--text"
-                color="teal"
+                color="primary"
                 :disabled="!valid"
                 block
                 x-large

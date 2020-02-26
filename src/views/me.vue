@@ -93,7 +93,7 @@
               <v-spacer></v-spacer>
               <v-icon>mdi-chevron-right</v-icon>
             </v-list-item>
-            <v-divider :key="index"></v-divider>
+            <v-divider  :key='item.index'></v-divider>
           </template>
         </v-list>
       </FirmEditor>

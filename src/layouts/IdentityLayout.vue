@@ -35,7 +35,4 @@ export default {
 };
 </script>
 <style scoped>
-.test{
- margin: 0 auto !important;
-}
 </style>
