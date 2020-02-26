@@ -89,7 +89,7 @@ export default {
     }
   },
   async mounted() {
-    await this.auth();
+    // await this.auth();
   },
   methods: {
     async auth() {

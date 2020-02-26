@@ -8,7 +8,7 @@
           </v-btn>
         </v-col>
         <v-col cols="10" style="margin: auto">
-          <v-toolbar-title class="subtitle-1 d-flex justify-center text-center">Real Producer</v-toolbar-title>
+          <v-toolbar-title class="subtitle-1 d-flex justify-center text-center">{{title}}</v-toolbar-title>
         </v-col>
           <v-col cols="1">
          
@@ -23,7 +23,15 @@
 
 <script>
 export default {
-  name: "IdentityLayout"
+  name: "IdentityLayout",
+  data:()=>{
+    return{
+      title:''
+    }
+  },
+  mounted(){
+    this.title = this.$route.name
+  }
 };
 </script>
 <style scoped>

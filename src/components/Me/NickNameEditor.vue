@@ -9,12 +9,12 @@
       <slot v-bind:on="on"></slot>
     </template>
     <v-card>
-      <v-toolbar dark color="teal">
+      <v-toolbar dark color="primary">
         <v-btn icon dark @click="show = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-toolbar-title>{{
-          !!user.nickName ? "修改昵称" : "设置昵称"
+          !!user.nickName ? "Edit your name" : "Change your name"
         }}</v-toolbar-title>
       </v-toolbar>
       <v-container fluid>
@@ -24,7 +24,7 @@
               <v-text-field
                 v-model="data.nickName"
                 class="ma-0 pa-0"
-                label="请输入昵称"
+                label="please input your name"
                 :rules="form.nickName.rules"
                 :counter="form.nickName.counter"
               ></v-text-field>
@@ -32,12 +32,12 @@
             <v-col cols="12">
               <v-btn
                 class="white--text"
-                color="teal"
+                color="primary"
                 :disabled="!valid"
                 block
                 x-large
                 @click="save"
-                >保存
+                >Save
               </v-btn>
             </v-col>
           </v-row>
