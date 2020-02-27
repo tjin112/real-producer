@@ -4,6 +4,6 @@ import Login from "../views/login";
 import Register from "../views/reg";
 import Orders from "../views/orders";
 import Me from "../views/me";
-import Test from "../views/test";
+import CustomerInfo from "../views/customerInfo";
 
-export default [Index, Search, Login, Register, Orders, Me, Test];
+export default [Index, Search, Login, Register, Orders, Me, CustomerInfo];
