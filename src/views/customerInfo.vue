@@ -18,7 +18,7 @@
             </v-list-item>
           </v-list>
         </v-col>
-        <v-col cols="12" sm="6">
+        <v-col cols="12">
           <v-textarea
             v-model="notes"
             name="input-7-1"
@@ -27,7 +27,7 @@
             rows="1"
             validate-on-blur
             @blur="blur"
-            outlined=""
+            outlined
           ></v-textarea>
         </v-col>
       </v-row>
@@ -95,6 +95,7 @@
 <script>
 export default {
   name: "CustomerInfo",
+  title: "Customer Information",
   path: "/customerInfo",
   layout: "identity",
   data: () => ({

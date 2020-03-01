@@ -8,11 +8,12 @@
           </v-btn>
         </v-col>
         <v-col cols="10" style="margin: auto">
-          <v-toolbar-title class="subtitle-1 d-flex justify-center text-center">{{title}}</v-toolbar-title>
+          <v-toolbar-title
+            class="subtitle-1 d-flex justify-center text-center"
+            >{{ title }}</v-toolbar-title
+          >
         </v-col>
-          <v-col cols="1">
-         
-        </v-col>
+        <v-col cols="1"> </v-col>
       </v-row>
     </v-app-bar>
     <v-content>
@@ -24,15 +25,14 @@
 <script>
 export default {
   name: "IdentityLayout",
-  data:()=>{
-    return{
-      title:''
-    }
+  data: () => {
+    return {
+      title: ""
+    };
   },
-  mounted(){
-    this.title = this.$route.name
+  mounted() {
+    this.title = this.$route.meta.title;
   }
 };
 </script>
-<style scoped>
-</style>
+<style scoped></style>
