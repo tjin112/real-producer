@@ -21,7 +21,7 @@
       >
       <v-expansion-panels class="mt-2" focusable>
         <v-expansion-panel v-for="(item, i) in openHouse" :key="i">
-          <v-expansion-panel-header>{{ item.day }}</v-expansion-panel-header>
+          <v-expansion-panel-header>{{ item.day }} </v-expansion-panel-header>
           <v-expansion-panel-content>
             <v-row>
               <v-col cols="6" style="text-align:center">
@@ -30,10 +30,11 @@
               <v-col cols="6" style="text-align:center">
                 {{ item.time }}
               </v-col>
-              <v-col cols="12" 
-                ><v-btn small style="float-right">Edit</v-btn>
-              
-                <v-btn small @click="del(i)" style="float-right"
+              <v-col cols="6" style="text-align:center"
+                ><v-btn small>Edit</v-btn>
+              </v-col>
+              <v-col cols="6" style="text-align:center"
+                ><v-btn small @click="del(i)"
                   ><v-icon color="red" class="float-right"
                     >mdi-delete</v-icon
                   ></v-btn
@@ -48,9 +49,15 @@
       <v-toolbar-title class="subtitle-1 font-weight-medium	"
         >All members:</v-toolbar-title
       >
-      <v-chip class="ma-2" color="primary" label v-for="(item,i) in openHouse" :key="i">
+      <v-chip
+        class="ma-2"
+        color="primary"
+        label
+        v-for="(item, i) in openHouse"
+        :key="i"
+      >
         <v-icon left>mdi-account-circle-outline</v-icon>
-        {{item.member}}
+        {{ item.member }}
       </v-chip>
     </v-card>
   </v-container>
