@@ -9,4 +9,6 @@ import AddContact from "../views/customerManagement/addContact"
 import tagsearch from "../views/customerManagement/tagSearch"
 import addShowing from "../views/customerManagement/addShowing"
 import addAppointment from "../views/customerManagement/addAppointment"
-export default [Index, Search, Login, Register, Orders, Me, CustomerInfo,AddContact,tagsearch,addShowing,addAppointment];
+import openHouse from "../views/openHouseManagement/openHouse"
+import openHouseDetail from "../views/openHouseManagement/details"
+export default [Index, Search, Login, Register, Orders, Me, CustomerInfo,AddContact,tagsearch,addShowing,addAppointment,openHouse,openHouseDetail];
