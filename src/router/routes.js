@@ -5,10 +5,13 @@ import Register from "../views/reg";
 import Orders from "../views/orders";
 import Me from "../views/me";
 import CustomerInfo from "../views/customerInfo";
-import AddContact from "../views/customerManagement/addContact"
-import tagsearch from "../views/customerManagement/tagSearch"
-import addShowing from "../views/customerManagement/addShowing"
-import addAppointment from "../views/customerManagement/addAppointment"
-import openHouse from "../views/openHouseManagement/openHouse"
-import openHouseDetail from "../views/openHouseManagement/details"
-export default [Index, Search, Login, Register, Orders, Me, CustomerInfo,AddContact,tagsearch,addShowing,addAppointment,openHouse,openHouseDetail];
+import AddContact from "../views/customerManagement/addContact";
+import tagsearch from "../views/customerManagement/tagSearch";
+import addShowing from "../views/customerManagement/addShowing";
+import addAppointment from "../views/customerManagement/addAppointment";
+import openHouse from "../views/openHouseManagement/openHouse";
+import openHouseDetail from "../views/openHouseManagement/details";
+import List from "../views/listingManagement/list";
+import Leads from "../views/propertyManagement/list";
+import AddEvent from "../views/propertyManagement/addEvent";
+export default [Index, Search, Login, Register, Orders, Me, CustomerInfo,AddContact,tagsearch,addShowing,addAppointment,openHouse,openHouseDetail,List,Leads,AddEvent];

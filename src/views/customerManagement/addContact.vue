@@ -5,21 +5,38 @@
       <v-row no-gutters="">
         <v-col cols="12">
           <v-text-field
-            label="Name:"
+            label="First name"
             clearable
             dense
             :rules="[rules.required]"
             maxlength="20"
+            prepend-icon="mdi-account"
           ></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field label="Email:" clearable dense :rules="[rules.email]"></v-text-field>
+          <v-text-field
+            label="Last name"
+            clearable
+            dense
+            :rules="[rules.required]"
+            maxlength="20"
+            prepend-icon="mdi-account"
+          ></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field label="Phone:" clearable dense></v-text-field>
+          <v-text-field
+            label="Email:"
+            clearable
+            dense
+            :rules="[rules.email]"
+            prepend-icon="mdi-email"
+          ></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field label="Home:" clearable dense></v-text-field>
+          <v-text-field label="Phone:" clearable dense prepend-icon="mdi-phone"></v-text-field>
+        </v-col>
+        <v-col cols="12">
+          <v-text-field label="Home:" clearable dense prepend-icon="mdi-home"></v-text-field>
         </v-col>
       </v-row>
     </v-card>
@@ -28,19 +45,19 @@
       <v-subheader class="pa-0">others：</v-subheader>
       <v-row no-gutters="">
         <v-col cols="12">
-          <v-text-field label="配偶电话:" dense></v-text-field>
+          <v-text-field label="配偶电话:" dense prepend-icon="mdi-home-account"></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field label="紧急联系人:" dense></v-text-field>
+          <v-text-field label="紧急联系人:" dense prepend-icon="mdi-car-brake-alert"></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field label="工作地址:" dense></v-text-field>
+          <v-text-field label="工作地址:" dense prepend-icon="mdi-briefcase"></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field label="tag:" dense></v-text-field>
+          <v-text-field label="tag:" dense prepend-icon="mdi-tag-outline"></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field label="Note:" dense></v-text-field>
+          <v-text-field label="Note:" dense prepend-icon="mdi-note"></v-text-field>
         </v-col>
       </v-row>
     </v-card>
@@ -56,7 +73,7 @@
 <script>
 export default {
   name: "AddContact",
-  title:'Add Contact',
+  title: "Add Contact",
   path: "/addContact",
   layout: "identity",
   data() {
