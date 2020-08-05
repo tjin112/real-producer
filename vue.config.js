@@ -1,6 +1,6 @@
 module.exports = {
   transpileDependencies: ["vuetify"],
   devServer: {
-    proxy: "http://127.0.0.1:5000"
+    proxy: "http://101.132.117.186:5050"
   }
 };

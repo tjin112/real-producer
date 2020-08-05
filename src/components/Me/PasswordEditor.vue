@@ -13,38 +13,29 @@
         <v-btn icon dark @click="show = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
-        <v-toolbar-title>{{
-          user.hasPassword ? "修改密码" : "设置密码"
-        }}</v-toolbar-title>
+        <v-toolbar-title>修改密码</v-toolbar-title>
       </v-toolbar>
       <v-container fluid>
         <v-form v-model="valid" ref="form" class="mt-6" lazy-validation>
           <v-row>
             <v-col cols="12">
+              <!-- 输入原始密码 -->
               <v-text-field
-                :value="`当前邮箱地址：${user.email || ''}`"
+                v-model="data.oldPwd"
                 class="ma-0 pa-0"
-                readonly
-                solo
+                label="请输入current password"
+                :rules="form.oldPwd.rules"
+                :append-icon="showOldPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                @click:append="showOldPassword = !showOldPassword"
+                :type="showOldPassword ? 'text' : 'password'"
               ></v-text-field>
-            </v-col>
-            <v-col cols="8" class="pr-0">
-              <v-text-field
-                v-model="data.captcha"
-                class="ma-0 pa-0"
-                label="请输入验证码"
-                :rules="form.captcha.rules"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="4" class="text-center pl-0 pr-0">
-              <a color="primary" @click="sendCaptcha">
-                {{ captchaText }}
-              </a>
             </v-col>
             <v-col cols="12">
               <v-text-field
                 v-model="data.password"
-                type="password"
+                :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                @click:append="showPassword = !showPassword"
+                :type="showPassword ? 'text' : 'password'"
                 class="ma-0 pa-0"
                 label="请输入new password"
                 :rules="form.password.rules"
@@ -53,10 +44,12 @@
             <v-col cols="12">
               <v-text-field
                 v-model="data.repassword"
-                type="password"
                 class="ma-0 pa-0"
                 label="请再次输入new password"
                 :rules="form.repassword.rules"
+                :append-icon="repassword ? 'mdi-eye' : 'mdi-eye-off'"
+                @click:append="repassword = !repassword"
+                :type="repassword ? 'text' : 'password'"
               ></v-text-field>
             </v-col>
             <v-col cols="12">
@@ -67,6 +60,7 @@
                 block
                 x-large
                 @click="setPassword"
+                :loading="loading"
                 >Save
               </v-btn>
             </v-col>
@@ -86,30 +80,38 @@ export default {
       valid: false,
       canResend: true,
       isSending: false,
-      captchaText: "获取验证码",
+      showPassword: false,
+      showOldPassword: false,
+      repassword: false,
+      loading: false,
       data: {
         captcha: "",
+        oldPwd: "",
         password: "",
-        repassword: ""
+        repassword: "",
       },
       form: {
         captcha: {
-          rules: [val => !!val || "请输入验证码"]
+          rules: [(val) => !!val || "请输入验证码"],
+        },
+        oldPwd: {
+          rules: [(val) => !!val || "不能为空"],
         },
         password: {
           rules: [
-            val => !!val || "请输入密码",
-            val =>
-              /^.*(?=.{6,20})(?=.*\d)(?=.*[A-Za-z]).*$/.test(val) ||
-              "密码为6-20，字母、数字和字符组成"
-          ]
+            (val) => !!val || "请输入密码",
+            (val) =>
+              /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,12}$/.test(
+                val
+              ) || "请输入密码包括至少一个大写字母，数字以及特殊符号",
+          ],
         },
         repassword: {
           rules: [
-            v => (!!v && v) === this.data.password || "Values do not match"
-          ]
-        }
-      }
+            (v) => (!!v && v) === this.data.password || "Values do not match",
+          ],
+        },
+      },
     };
   },
   computed: {
@@ -122,39 +124,37 @@ export default {
       },
       get() {
         return this.dialog;
-      }
+      },
     },
     user() {
       return this.$store.getters.user;
-    }
+    },
   },
   methods: {
-    sendCaptcha() {
-      if (this.canResend) {
-        this.canResend = false;
-        let time = 60;
-        const resend = setInterval(() => {
-          this.captchaText = `${time--}s后重试`;
-        }, 1000);
-        setTimeout(() => {
-          clearInterval(resend);
-          this.captchaText = "重新获取验证码";
-          this.canResend = true;
-        }, 60000);
-        this.$axios.post("/account/captcha");
-      }
-    },
     async setPassword() {
       if (this.$refs.form.validate()) {
+        this.loading = true;
         try {
-          await this.$axios.patch("/account/password", this.data);
+          await this.$axios.put(
+            "/api/accounts/password",
+            {
+              originalPassword: this.data.oldPwd,
+              newPassword: this.data.password,
+            },
+            {
+              headers: {
+                Authorization: sessionStorage.getItem("auth"),
+              },
+            }
+          );
           this.user.HasPassword = true;
+          this.loading = false;
           this.show = false;
         } catch (err) {
           console.error(err);
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>

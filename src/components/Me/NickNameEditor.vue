@@ -22,9 +22,18 @@
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="data.nickName"
+                v-model="data.firstName"
                 class="ma-0 pa-0"
-                label="please input your name"
+                label="please input your first name"
+                :rules="form.nickName.rules"
+                :counter="form.nickName.counter"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                v-model="data.lastName"
+                class="ma-0 pa-0"
+                label="please input your last name"
                 :rules="form.nickName.rules"
                 :counter="form.nickName.counter"
               ></v-text-field>
@@ -48,6 +57,7 @@
 </template>
 
 <script>
+// import qs from "qs";
 export default {
   name: "MobileEditor",
   data() {
@@ -55,18 +65,15 @@ export default {
       dialog: false,
       valid: false,
       data: {
-        nickName: ""
+        firstName: "",
+        lastName: "",
       },
       form: {
         nickName: {
           counter: 20,
-          rules: [
-            val => !!val || "请输入昵称",
-            val =>
-              (val && val.length <= this.form.nickName.counter) || "昵称过长"
-          ]
-        }
-      }
+          rules: [(val) => !!val || "cannot be empty"],
+        },
+      },
     };
   },
   watch: {
@@ -74,7 +81,7 @@ export default {
       if (val) {
         this.data.nickName = this.user.nickName;
       }
-    }
+    },
   },
   computed: {
     show: {
@@ -86,24 +93,59 @@ export default {
       },
       get() {
         return this.dialog;
-      }
+      },
     },
     user() {
       return this.$store.getters.user;
-    }
+    },
   },
   methods: {
     async save() {
       if (this.$refs.form.validate()) {
         try {
-          await this.$axios.patch("/s/user/nickname", this.data);
-          this.user.nickName = this.data.nickName;
+          await this.$axios.put(
+            "/api/accounts/firstname",
+            {
+              name: this.data.firstName,
+            },
+            {
+              headers: {
+                Authorization: this.$store.state.Identity.auth
+                  ? this.$store.state.Identity.auth
+                  : JSON.parse(localStorage.getItem("token")),
+              },
+            }
+          );
+          await this.$axios.put(
+            "/api/accounts/lastname",
+            {
+              name: this.data.lastName,
+            },
+            {
+              headers: {
+                Authorization: this.$store.state.Identity.auth
+                  ? this.$store.state.Identity.auth
+                  : JSON.parse(localStorage.getItem("token")),
+              },
+            }
+          );
           this.show = false;
+          await this.$axios
+            .get("/api/accounts/", {
+              headers: {
+                Authorization: this.$store.state.Identity.auth
+                  ? this.$store.state.Identity.auth
+                  : JSON.parse(localStorage.getItem("token")),
+              },
+            })
+            .then((res) => {
+              this.$store.commit("SET_USER", res.data);
+            });
         } catch (err) {
           console.error(err);
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>

@@ -2,37 +2,49 @@
   <v-container fluid class="pa-4">
     <v-img src="https://picsum.photos/510/300?random" aspect-ratio="2"></v-img>
     <v-form v-model="valid" ref="form" class="mt-6" lazy-validation>
-      <!-- <v-row v-if="isCaptcha" gutters>
-        <v-col cols="12">
-          <v-text-field
-            v-model="data.username"
-            class="ma-0 pa-0"
-            label="请输入手机号"
-            :rules="form.username.rules"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="8" class="pr-0">
-          <v-text-field password
-            v-model="data.captcha"
-            class="ma-0 pa-0"
-            label="请输入密码"
-            :rules="form.captcha.rules"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="4" class="text-center pl-0 pr-0">
-          <a style="color:#009688" @click="sendCaptcha">
-            {{ captchaText }}
-          </a>
-        </v-col>
-      </v-row> -->
       <v-row no-gutters>
-        <v-col cols="12">
+        <v-col cols="12" v-if="trebIdShow">
           <v-text-field
             v-model="data.username"
             class="ma-0 pa-0"
-            label="User name or Email"
-            :rules="form.username.rules"
+            label="please input your treb ID"
+            :rules="form.trebid.rules"
           ></v-text-field>
+        </v-col>
+
+        <v-col cols="12" v-else>
+          <v-text-field
+            v-model="data.username"
+            class="ma-0 pa-0"
+            label="please input your Email"
+            :rules="form.email.rules"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" class="d-flex justify-end" v-if="trebIdShow">
+          <v-btn
+            class="ma-2 "
+            outlined
+            color="indigo"
+            x-small
+            @click="
+              trebIdShow = !trebIdShow;
+              data.mode = 'email';
+            "
+            ><v-icon left>mdi-email</v-icon> login by email</v-btn
+          >
+        </v-col>
+        <v-col cols="12" class="d-flex justify-end" v-else>
+          <v-btn
+            class="ma-2 "
+            outlined
+            color="indigo"
+            x-small
+            @click="
+              trebIdShow = !trebIdShow;
+              data.mode = 'username';
+            "
+            ><v-icon left>mdi-email</v-icon> login by trebid</v-btn
+          >
         </v-col>
         <v-col cols="12" class="pr-0 pt-4">
           <v-text-field
@@ -45,7 +57,7 @@
             @click:append="showPassword = !showPassword"
           ></v-text-field>
         </v-col>
-        <v-col cols="12" class="text-center pl-0 pr-0 d-flex justify-end" >
+        <v-col cols="12" class="text-center pl-0 pr-0 d-flex justify-end">
           <a color="primary">forget your password?</a>
         </v-col>
       </v-row>
@@ -64,7 +76,9 @@
       </v-row>
       <v-row class="body-2" no-gutters>
         <v-col cols="12 pl-0 pr-0 pt-2 d-flex justify-center">
-          <a color="primary" @click="$router.push('/reg')">Don't have an account?</a>
+          <a color="primary" @click="$router.push('/reg')"
+            >Don't have an account?</a
+          >
         </v-col>
         <v-col cols="12 pl-0 pr-0 pt-2 d-flex justify-center">
           <a color="primary">Sign in with google</a>
@@ -78,6 +92,7 @@
 </template>
 
 <script>
+import qs from "qs";
 export default {
   name: "Login",
   path: "/login",
@@ -85,89 +100,62 @@ export default {
   data() {
     return {
       valid: false,
-      isCaptcha: true,
-      isSending: false,
-      canResend: true,
       showPassword: false,
-      captchaText: "获取验证码",
       snackbar: false,
       timeout: 3000,
+      trebIdShow: true,
       tip: "",
       data: {
         username: "",
-        captcha: "",
-        password: ""
+        mode: "username",
+        password: "",
+        grant: "password",
       },
       form: {
-        username: {
-          rules: [
-            val => !!val || "请输入手机号",
-            val => (val && /^1[3-9]\d{9}$/.test(val)) || "请输入正确手机号"
-          ]
+        trebid: {
+          rules: [(val) => !!val || "请输入treb ID"],
         },
-        captcha: {
-          rules: [val => this.isSending || !!val || "请输入验证码"]
+        email: {
+          rules: [
+            (val) => !!val || "请输入邮箱",
+            (val) =>
+              (val &&
+                /^[0-9a-zA-Z_.-]+[@][0-9a-zA-Z_.-]+([.][a-zA-Z]+){1,2}$/.test(
+                  val
+                )) ||
+              "请输入正确邮箱",
+          ],
         },
         password: {
-          rules: [val => !!val || "请输入密码"]
-        }
-      }
+          rules: [(val) => !!val || "请输入密码"],
+        },
+      },
     };
   },
   methods: {
-    changeMode() {
-      this.isCaptcha = !this.isCaptcha;
-      this.$refs.form.resetValidation();
-    },
-    sendCaptcha() {
-      if (this.canResend) {
-        this.canResend = false;
-        this.isSending = true;
-        if (this.$refs.form.validate()) {
-          let time = 60;
-          const resend = setInterval(() => {
-            this.captchaText = `${time--}s后重试`;
-          }, 1000);
-          setTimeout(() => {
-            clearInterval(resend);
-            this.captchaText = "重新获取验证码";
-            this.canResend = true;
-          }, 60000);
-          this.$axios.post(`/verification/captcha/${this.data.username}`);
-        } else {
-          this.canResend = true;
-        }
-      }
-    },
     async login() {
       this.isSending = false;
+      this.data = qs.stringify(this.data);
       if (this.$refs.form.validate()) {
-        let data = "";
-        if (this.isCaptcha) {
-          data = `username=${this.data.username}&captcha=${this.data.captcha}&mode=mobile&grant=captcha`;
-        } else {
-          data = `username=${this.data.username}&password=${this.data.password}&mode=mobile&grant=password`;
-        }
         try {
-          const { data: token } = await this.$axios.post(
-            "/account/token",
-            data
-          );
-          this.$store.commit("SET_TOKEN", token);
-          this.$router.push(this.$route.query.redirect || "/");
+          const data = await this.$axios.post("/api/accounts/token", this.data);
+          this.$store.commit("SET_TOKEN", data);
+          this.$router.push(this.$route.query.redirect || "/me");
         } catch (e) {
           this.snackbar = true;
-          switch (e.response.status) {
-            case 401:
-              this.tip = `手机号或${this.isCaptcha ? "验证码" : "密码"}错误`;
-              break;
-            default:
-              this.tip = "登录中出现错误";
-              break;
-          }
+          this.tip = "failed to login";
+          console.log(e.response);
+          // switch (e.response.status) {
+          //   case 401:
+          //     this.tip = `手机号或${this.isCaptcha ? "验证码" : "密码"}错误`;
+          //     break;
+          //   default:
+          //     this.tip = "登录中出现错误";
+          //     break;
+          // }
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>

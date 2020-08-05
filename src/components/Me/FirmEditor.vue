@@ -17,31 +17,54 @@
           <v-toolbar-title>Firm Editor</v-toolbar-title>
         </v-toolbar>
         <v-container fluid>
-          <v-form v-model="valid" ref="form" class="mt-0" lazy-validation>
+          <v-form v-model="valid" ref="form" class="mt-0">
             <v-row>
-              <v-col cols="12" class="subtitle-1 pb-0 pl-6">
-                公司名称:
+              <v-col cols="12" class="subtitle-1 pa-0 ma-0 pl-6 pr-6 pt-4">
+                <v-text-field
+                  prepend-icon="mdi-briefcase"
+                  v-model="userInfo.company"
+                  class="pa-0"
+                  :rules="rules"
+                  clearable
+                  hint="Company Name"
+                  :persistent-hint="persistenthint"
+                ></v-text-field>
               </v-col>
-              <v-col cols="9" class="subtitle-1 pa-0 ma-0 pl-6">
-                <v-text-field value="avc" class="pa-0"></v-text-field>
-              </v-col>
-              <v-col cols="12" class="subtitle-1 pb-0 pl-6">
+              <!-- <v-col cols="12" class="subtitle-1 pb-0 pl-6">
                 公司地址:
+              </v-col> -->
+              <v-col cols="12" class="subtitle-1 pa-0 ma-0 pl-6 pr-6 pt-4">
+                <v-text-field
+                  prepend-icon="mdi-map-marker"
+                  v-model="userInfo.companyAddress"
+                  class="pa-0"
+                  :rules="rules"
+                  clearable
+                  hint="Company Address"
+                  :persistent-hint="persistenthint"
+                ></v-text-field>
               </v-col>
-              <v-col cols="9" class="subtitle-1 pa-0 ma-0 pl-6">
-                <v-text-field value="avc" class="pa-0"></v-text-field>
+              <v-col cols="12" class="subtitle-1 pa-0 ma-0 pl-6 pr-6 pt-4">
+                <v-text-field
+                  prepend-icon="mdi-phone"
+                  v-model="userInfo.companyTel"
+                  class="pa-0"
+                  :rules="rules"
+                  clearable
+                  hint="Company Fax"
+                  :persistent-hint="persistenthint"
+                ></v-text-field>
               </v-col>
-              <v-col cols="12" class="subtitle-1 pb-0 pl-6">
-                公司Fax:
-              </v-col>
-              <v-col cols="9" class="subtitle-1 pa-0 ma-0 pl-6">
-                <v-text-field value="6479793401" class="pa-0"></v-text-field>
-              </v-col>
-              <v-col cols="12" class="subtitle-1 pb-0 pl-6">
-                公司邮箱:
-              </v-col>
-              <v-col cols="9" class="subtitle-1 pa-0 ma-0 pl-6">
-                <v-text-field value="avc" class="pa-0"></v-text-field>
+              <v-col cols="12" class="subtitle-1 pa-0 ma-0 pl-6 pr-6 pt-4">
+                <v-text-field
+                  prepend-icon="mdi-email"
+                  v-model="userInfo.companyEmail"
+                  class="pa-0"
+                  :rules="rules"
+                  clearable
+                  hint="Company Email"
+                  :persistent-hint="persistenthint"
+                ></v-text-field>
               </v-col>
             </v-row>
             <v-col cols="12" class="mt-2">
@@ -52,6 +75,7 @@
                 block
                 x-large
                 @click="setFirm"
+                :loading="loading"
                 >Save
               </v-btn>
             </v-col>
@@ -59,8 +83,8 @@
         </v-container>
       </v-card>
     </v-dialog>
-    <v-snackbar v-model="snackbar" color="error" :timeout="timeout" top>
-      save successfully
+    <v-snackbar v-model="snackbar" color="" :timeout="timeout">
+      processing....
     </v-snackbar>
   </div>
 </template>
@@ -70,6 +94,7 @@ export default {
   name: "FirmEditor",
   data() {
     return {
+      persistenthint: true,
       snackbar: false,
       timeout: 2000,
       dialog: false,
@@ -78,27 +103,20 @@ export default {
       isSending: false,
       captchaText: "获取验证码",
       email: "",
-      data: {
-        mobile: "",
-        captcha: ""
-      },
-      form: {
-        email: {
-          rules: [
-            val => !!val || "请输入email",
-            val =>
-              (val &&
-                /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(
-                  val
-                )) ||
-              "请输入正确邮箱地址"
-          ]
-        },
-        captcha: {
-          rules: [val => this.isSending || !!val || "请输入验证码"]
-        }
-      }
+      loading: false,
+      userInfo: Object,
+      rules: [(value) => !!value || "Cannot be empty."],
     };
+  },
+  watch: {
+    show: {
+      handler: function() {
+        if (!this.oldEmail) {
+          const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+          this.oldEmail = userInfo.email;
+        }
+      },
+    },
   },
   computed: {
     show: {
@@ -110,79 +128,89 @@ export default {
       },
       get() {
         return this.dialog;
-      }
+      },
     },
     user() {
       return this.$store.getters.user;
-    }
+    },
   },
   methods: {
-    sendBindCaptcha() {
-      if (this.canResend) {
-        this.canResend = false;
-        this.isSending = true;
-        if (this.$refs.form.validate()) {
-          let time = 60;
-          const resend = setInterval(() => {
-            this.captchaText = `${time--}s后重试`;
-          }, 1000);
-          setTimeout(() => {
-            clearInterval(resend);
-            this.captchaText = "重新获取验证码";
-            this.canResend = true;
-          }, 60000);
-          this.$axios.post(`/verification/captcha/${this.data.email}`);
-        } else {
-          this.canResend = true;
-        }
-      }
-    },
-    sendUnbindCaptcha() {
-      if (this.canResend) {
-        this.canResend = false;
-        let time = 60;
-        const resend = setInterval(() => {
-          this.captchaText = `${time--}s后重试`;
-        }, 1000);
-        setTimeout(() => {
-          clearInterval(resend);
-          this.captchaText = "重新获取验证码";
-          this.canResend = true;
-        }, 60000);
-        this.$axios.post("/account/captcha");
-      }
-    },
-    async bind() {
-      this.isSending = false;
-      if (this.$refs.form.validate()) {
-        try {
-          await this.$axios.patch("/account/mobile", this.data);
-          this.user.mobile = this.data.email;
-          this.show = false;
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    },
-    async unbind() {
-      if (this.$refs.form.validate()) {
-        try {
-          await this.$axios.delete("/account/mobile", {
-            captcha: this.data.captcha
-          });
-          this.user.mobile = undefined;
-          this.show = false;
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    },
-    setFirm() {
+    async setFirm() {
       this.snackbar = true;
-      setTimeout(() => {
-          this.dialog = false;
-      }, 2000);
-    }
-  }
+      this.loading = true;
+      // 修改公司名称
+      await this.$axios.put(
+        "/api/accounts/company",
+        {
+          company: this.userInfo.company,
+        },
+        {
+          headers: {
+            Authorization: this.$store.state.Identity.auth
+              ? this.$store.state.Identity.auth
+              : JSON.parse(localStorage.getItem("token")),
+          },
+        }
+      );
+      //修改公司地址
+      await this.$axios.put(
+        "/api/accounts/company/address",
+        {
+          companyAddress: this.userInfo.companyAddress,
+        },
+        {
+          headers: {
+            Authorization: this.$store.state.Identity.auth
+              ? this.$store.state.Identity.auth
+              : JSON.parse(localStorage.getItem("token")),
+          },
+        }
+      );
+      //编辑公司电话
+      await this.$axios.put(
+        "/api/accounts/company/telephone",
+        {
+          companyTelephone: this.userInfo.companyTel,
+        },
+        {
+          headers: {
+            Authorization: this.$store.state.Identity.auth
+              ? this.$store.state.Identity.auth
+              : JSON.parse(localStorage.getItem("token")),
+          },
+        }
+      );
+      // 编辑公司邮箱
+      await this.$axios.put(
+        "/api/accounts/company/email",
+        {
+          companyEmail: this.userInfo.companyEmail,
+        },
+        {
+          headers: {
+            Authorization: this.$store.state.Identity.auth
+              ? this.$store.state.Identity.auth
+              : JSON.parse(localStorage.getItem("token")),
+          },
+        }
+      );
+
+      // 重新获取用户信息
+      await this.$axios
+        .get("/api/accounts/", {
+          headers: {
+            Authorization: this.$store.state.Identity.auth
+              ? this.$store.state.Identity.auth
+              : JSON.parse(localStorage.getItem("token")),
+          },
+        })
+        .then((res) => {
+          this.$store.commit("SET_USER", res.data);
+          localStorage.setItem("userInfo", JSON.stringify(res.data));
+        });
+      this.loading = false;
+      this.dialog = false;
+    },
+  },
 };
 </script>

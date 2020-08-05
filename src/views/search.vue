@@ -115,7 +115,7 @@ export default {
   },
   methods: {
     search() {
-      this.$store.commit("SET_SEARCH", this.params.name);
+      // this.$store.commit("SET_SEARCH", this.params.name);
       this.getProducts();
     },
     searchHistory(keyword) {

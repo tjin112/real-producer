@@ -1,11 +1,12 @@
 <template>
   <v-container fluid>
-    <v-card>
+    <v-card class="mb-4">
       <v-list>
+        <v-subheader>Personal Information</v-subheader>
         <v-list-item ripple>
           <v-row class="" style="width:100%" no-gutters>
             <v-col cols="4" @click="$refs.upload.click()">
-              <v-avatar class="profile" size="90" tile>
+              <v-avatar class="profile" size="70" tile>
                 <v-img v-if="!!user.avatar" :src="user.avatar" />
                 <v-icon v-else x-large>mdi-account-circle</v-icon>
               </v-avatar>
@@ -20,9 +21,8 @@
             <v-col cols="8">
               <nickname-editor v-slot="{ on }">
                 <v-list-item ripple v-on="on" class="pa-0 fill-height">
-                  <v-list-item-content>
-                    {{ user.nickName || "设置昵称" }}
-                  </v-list-item-content>
+                  {{ $store.state.Identity.user.firstName || "设置昵称" }}
+                  {{ $store.state.Identity.user.lastName || "" }}
                   <v-spacer></v-spacer>
                   <v-icon>mdi-chevron-right</v-icon>
                 </v-list-item>
@@ -32,18 +32,12 @@
           <v-spacer></v-spacer>
         </v-list-item>
         <v-divider></v-divider>
-        <gender-selector v-slot="{ on }">
-          <v-list-item ripple v-on="on">
-            <v-list-item-content>
-              {{ user.gender | genders }}
-            </v-list-item-content>
-            <v-spacer></v-spacer>
-            <v-icon>mdi-chevron-right</v-icon>
-          </v-list-item>
-        </gender-selector>
         <v-divider></v-divider>
         <mobile-editor v-slot="{ on }">
           <v-list-item ripple v-on="on">
+            <v-list-item-icon>
+              <v-icon color="red">mdi-phone</v-icon>
+            </v-list-item-icon>
             <v-list-item-content>
               {{ user.mobile || "绑定手机号" }}
             </v-list-item-content>
@@ -55,10 +49,12 @@
         <v-divider></v-divider>
         <EmailEditor v-slot="{ on }">
           <v-list-item ripple v-on="on">
+            <v-list-item-icon>
+              <v-icon color="indigo">mdi-email</v-icon>
+            </v-list-item-icon>
             <v-list-item-content>
-              {{ email ? email : "set up your email" }}
+              {{ $store.state.Identity.user.email || "set up your email" }}
             </v-list-item-content>
-            <v-spacer></v-spacer>
             <v-icon>mdi-chevron-right</v-icon>
           </v-list-item>
         </EmailEditor>
@@ -72,29 +68,67 @@
             <v-icon>mdi-chevron-right</v-icon>
           </v-list-item>
         </password-editor>
-        <!-- <v-divider></v-divider>
-        <v-list-item to="/">
-          <v-list-item-content>
-            实名认证
-          </v-list-item-content>
-          <v-spacer></v-spacer>
-          <v-icon>mdi-chevron-right</v-icon>
-        </v-list-item> -->
       </v-list>
     </v-card>
-    <v-card class="mt-5 mx-auto">
+    <!-- 公司信息 -->
+    <v-card class="mt-2 mx-auto">
       <FirmEditor v-slot="{ on }">
         <v-list>
-          <template v-for="(item, index) in firm">
-            <v-list-item v-on="on" ripple :key="index">
-              <v-list-item-content>
-                {{ item.name ? item.name : item.text }}
-              </v-list-item-content>
-              <v-spacer></v-spacer>
-              <v-icon>mdi-chevron-right</v-icon>
-            </v-list-item>
-            <v-divider  :key='item.index'></v-divider>
-          </template>
+          <v-subheader>Company Information</v-subheader>
+          <v-list-item v-on="on" ripple>
+            <v-list-item-icon>
+              <v-icon color="indigo">mdi-briefcase</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{
+                $store.state.Identity.user.company
+              }}</v-list-item-title>
+             
+            </v-list-item-content>
+            <v-spacer></v-spacer>
+            <v-icon>mdi-chevron-right</v-icon>
+          </v-list-item>
+          <v-divider></v-divider>
+          <v-list-item v-on="on" ripple>
+            <v-list-item-icon>
+              <v-icon color="indigo">mdi-map-marker</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{
+                $store.state.Identity.user.companyAddress
+              }}</v-list-item-title>
+            
+            </v-list-item-content>
+            <v-icon>mdi-chevron-right</v-icon>
+          </v-list-item>
+          <v-divider></v-divider>
+          <v-list-item v-on="on" ripple>
+            <v-list-item-icon>
+              <v-icon color="indigo">mdi-email</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{
+                $store.state.Identity.user.companyEmail
+              }}</v-list-item-title>
+          
+            </v-list-item-content>
+            <v-icon>mdi-chevron-right</v-icon>
+          </v-list-item>
+          <v-divider></v-divider>
+          <v-list-item v-on="on" ripple>
+            <v-list-item-icon>
+              <v-icon color="red">mdi-phone</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{
+                $store.state.Identity.user.companyTel
+              }}</v-list-item-title>
+              <v-list-item-subtitle>Company Fax</v-list-item-subtitle>
+            </v-list-item-content>
+            <v-icon>mdi-chevron-right</v-icon>
+          </v-list-item>
+          <!-- <v-divider :key="item.index"></v-divider> -->
+          <!-- </template> -->
         </v-list>
       </FirmEditor>
     </v-card>
@@ -107,7 +141,6 @@
 <script>
 import NicknameEditor from "@/components/Me/NickNameEditor";
 import MobileEditor from "@/components/Me/MobileEditor";
-import GenderSelector from "@/components/Me/GenderSelector";
 import PasswordEditor from "@/components/Me/PasswordEditor";
 import EmailEditor from "@/components/Me/EmailEditor";
 import FirmEditor from "@/components/Me/FirmEditor";
@@ -120,85 +153,61 @@ export default {
   components: {
     NicknameEditor,
     MobileEditor,
-    GenderSelector,
     PasswordEditor,
     EmailEditor,
-    FirmEditor
+    FirmEditor,
   },
   data: () => ({
     snackbar: false,
     timeout: 3000,
     tip: "",
     email: "",
+    userInfo: "",
+    name: "",
     firm: [
       {
         name: "",
-        text: "set up firm name"
+        text: "set up firm name",
       },
       {
         name: "",
-        text: "set up firm address"
+        text: "set up firm address",
       },
       {
         name: "",
-        text: "set up firm fax"
+        text: "set up firm fax",
       },
       {
         name: "",
-        text: "set up firm email"
-      }
-    ]
+        text: "set up firm email",
+      },
+    ],
   }),
+
   computed: {
     user() {
       return this.$store.getters.user;
-    }
+    },
   },
-  filters: {
-    genders(gender) {
-      if (gender === 1) {
-        return "男";
-      } else if (gender === 2) {
-        return "女";
-      }
-    }
+  created() {
+    this.getUser();
   },
   methods: {
     async getUser() {
-      const { data: user } = await this.$axios.get("/s/user");
-      this.$store.commit("SET_USER", user);
-      this.user = this.$store.getters.user;
+      const user = await this.$axios.get("/api/accounts/", {
+        headers: {
+          Authorization: sessionStorage.getItem("auth"),
+        },
+      });
+      this.$store.commit("SET_USER", user.data);
+      localStorage.setItem("userInfo", JSON.stringify(user.data));
+      this.firm[0].name = this.$store.state.Identity.user.company;
+      this.firm[1].name = this.$store.state.Identity.user.companyAddress;
+      this.firm[2].name = this.$store.state.Identity.user.companyTel;
+      this.firm[3].name = this.$store.state.Identity.user.companyEmail;
     },
-    async setAvatar(e) {
-      const files = e.target.files;
-      if (files.length > 0) {
-        const file = files[0];
-        var formData = new FormData();
-        formData.append(
-          "target",
-          `user/avatar-${new Date().getTime()}.${file.name.split(".").pop()}`
-        );
-        formData.append("file", file);
-        try {
-          const result = await this.$axios.post("/files", formData, {
-            headers: {
-              "content-type": "multipart/form-data"
-            }
-          });
-          this.user.avatar = result.data.uri;
-          await this.$axios.patch("/s/user/avatar", {
-            avatar: this.user.avatar
-          });
-          await this.getUser();
-        } finally {
-          this.$refs.upload.value = "";
-        }
-      } else {
-        this.tip = "请选择头像";
-        this.snackbar = true;
-      }
-    }
-  }
+    async setAvatar() {},
+  },
 };
 </script>
 <style></style>

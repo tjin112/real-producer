@@ -6,7 +6,10 @@
           <v-icon color="primary" class="mr-2">mdi-account</v-icon>Taimin Jin
         </v-list-item>
         <v-list-item>
-          <v-text-field label="MLS NO."></v-text-field>
+          <v-text-field
+            label="MLS NO."
+            v-model="showing.items.mlsNo"
+          ></v-text-field>
         </v-list-item>
         <v-list-item>
           <v-row no-gutters="">
@@ -41,7 +44,12 @@
           </v-row>
         </v-list-item>
       </v-list>
-      <v-btn class="mt-5 float-right mb-5" dark large color="primary"
+      <v-btn
+        class="mt-5 float-right mb-5"
+        dark
+        large
+        color="primary"
+        @click="save()"
         >Save</v-btn
       >
     </v-card>
@@ -49,27 +57,57 @@
 </template>
 
 <script>
+import qs from "qs";
 export default {
   name: "addShowing",
   title: "Add new Showing",
   path: "/addshowing",
   layout: "identity",
-  data: vm => ({
+  data: (vm) => ({
     date: new Date().toISOString().substr(0, 10),
     dateFormatted: vm.formatDate(new Date().toISOString().substr(0, 10)),
-    menu1: false
+    menu1: false,
+    showing: {
+      customerId: "",
+      showingTime: "",
+      items: [{ mlsNo: "" }, { city: "" }, { region: "" }, { address: "" }],
+    },
   }),
 
   watch: {
     date() {
       this.dateFormatted = this.formatDate(this.date);
-    }
+      console.log(this.dateFormatted);
+    },
   },
 
   methods: {
+    async save() {
+      let dateStamp = Date.parse(this.dateFormatted);
+      await this.$axios.post(
+        "/api/showings",
+        {
+          customerId: 11,
+          showingTime: dateStamp,
+          items: [
+            {
+              type: 1,
+              mlsNo: "a123456",
+              city: "",
+              region: "",
+              address: "",
+            },
+          ],
+        },
+        {
+          headers: {
+            Authorization: sessionStorage.getItem("auth"),
+          },
+        }
+      );
+    },
     formatDate(date) {
       if (!date) return null;
-
       const [year, month, day] = date.split("-");
       return `${month}/${day}/${year}`;
     },
@@ -80,8 +118,8 @@ export default {
       console.log(date);
       console.log([month, day, year]);
       return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -1,22 +1,26 @@
 export default {
   state: {
-    identity: undefined,
-    user: {}
+    identity: '',
+    user: {},
+    auth: JSON.parse(localStorage.getItem("token")) || null
   },
   mutations: {
     SET_TOKEN(state, token) {
-      localStorage.setItem("token", JSON.stringify(token));
+      localStorage.setItem("token", JSON.stringify("Bearer " + token.data.access_token));
       const now = Date.parse(new Date()) / 1000;
-      if (token.access_token && token.expires_at > now) {
+      if (token.data.access_token && (token.data.expires_at > now)) {
         state.identity = {
-          auth: true,
-          token: token.access_token,
-          expired: token.expires_at
+          token: token.data.access_token,
+          type: token.data.token_type
         };
       }
+      const auth = state.identity.type+" " +state.identity.token
+      sessionStorage.setItem("auth",auth)
     },
     SET_USER(state, user) {
       state.user = user;
+      state.user.firstName =  state.user.firstName.replace(state.user.firstName[0],state.user.firstName[0].toUpperCase())
+      state.user.lastName =  state.user.lastName.replace(state.user.lastName[0],state.user.lastName[0].toUpperCase())
     },
     LOGOUT(state) {
       state.identity = undefined;
@@ -53,5 +57,6 @@ export default {
       return state.user;
     }
   },
-  actions: {}
+  actions: {
+  }
 };
