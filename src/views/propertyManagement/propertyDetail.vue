@@ -96,40 +96,142 @@
     </v-card>
     <!-- 租客信息 -->
     <v-card class="pa-4 mt-2">
-      <v-toolbar-title class="grey--text mb-2">Resident</v-toolbar-title>
-      <div v-for="(e, i) in propertyDetail.tenants" :key="i">
-        <v-text-field
-          label="Resident name"
-          placeholder="name"
-          outlined
-          :clearable="clearable"
-          dense
-          prepend-icon="mdi-account"
-          v-model="e.name"
-          :readonly="readonly"
-        ></v-text-field>
-        <v-text-field
-          label="phone"
-          placeholder="Placeholder"
-          outlined
-          :clearable="clearable"
-          dense
-          prepend-icon="mdi-phone"
-          v-model="e.telephone"
-          :readonly="readonly"
-        ></v-text-field>
-        <v-text-field
-          label="email"
-          placeholder="Placeholder"
-          outlined
-          :clearable="clearable"
-          dense
-          prepend-icon="mdi-email"
-          v-model="e.email"
-          :readonly="readonly"
-        ></v-text-field>
-      </div>
+      <v-toolbar-title class="grey--text mb-2">
+        <v-row>
+          <v-col cols="6"
+            ><span class="d-flex justify-start">Resident</span></v-col
+          >
+          <v-col cols="6">
+            <div class="d-flex justify-end" v-if="!readonly">
+              <v-dialog v-model="dialog" persistent max-width="600px">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    dark
+                    x-small
+                    color="white indigo--text"
+                    v-bind="attrs"
+                    v-on="on"
+                    >add new tenant
+                  </v-btn>
+                </template>
+                <v-form v-model="valid" ref="form" class="mt-6" lazy-validation>
+                  <v-card>
+                    <v-card-title>
+                      <span class="headline">User Profile</span>
+                    </v-card-title>
+                    <v-card-text>
+                      <v-container>
+                        <v-row>
+                          <v-col cols="12" sm="6" md="4">
+                            <v-text-field
+                              label="Name*"
+                              :rules="rules"
+                              v-model="newTenant.name"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="4">
+                            <v-text-field
+                              label="Telephone"
+                              v-model="newTenant.telephone"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="4">
+                            <v-text-field
+                              label="Email"
+                              v-model="newTenant.email"
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-container>
+                      <small>*indicates required field</small>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn color="blue darken-1" text @click="close()"
+                        >Close</v-btn
+                      >
+                      <v-btn
+                        color="blue darken-1"
+                        :disabled="!valid"
+                        text
+                        @click="addNewTenant()"
+                        >Save</v-btn
+                      >
+                    </v-card-actions>
+                  </v-card>
+                </v-form>
+              </v-dialog>
+            </div>
+          </v-col>
+        </v-row>
+      </v-toolbar-title>
+      <!-- == -->
+      <v-expansion-panels>
+        <v-expansion-panel v-for="(e, i) in propertyDetail.tenants" :key="i">
+          <v-expansion-panel-header>
+            <div v-if="readonly" class="subtitle-1">
+              <v-icon class="mr-2">mdi-account</v-icon>
+              {{ e.name }}
+            </div>
+            <div v-else>
+              <v-text-field
+                label="Resident name"
+                placeholder="name"
+                outlined
+                :clearable="clearable"
+                dense
+                prepend-icon="mdi-account"
+                v-model="e.name"
+              ></v-text-field>
+            </div>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <v-text-field
+              label="phone"
+              placeholder="Placeholder"
+              outlined
+              :clearable="clearable"
+              dense
+              prepend-icon="mdi-phone"
+              v-model="e.telephone"
+              :readonly="readonly"
+            ></v-text-field>
+            <v-text-field
+              label="email"
+              placeholder="Placeholder"
+              outlined
+              :clearable="clearable"
+              dense
+              prepend-icon="mdi-email"
+              v-model="e.email"
+              :readonly="readonly"
+            ></v-text-field>
+            <div>
+              <div class="d-flex justify-end">
+                <v-btn
+                  color="indigo"
+                  text=""
+                  x-small=""
+                  v-if="!readonly"
+                  @click="saveTenant(e, i)"
+                  >Save</v-btn
+                >
+
+                <v-btn
+                  color="red"
+                  text=""
+                  x-small=""
+                  v-if="!readonly"
+                  @click="deleteTenant(e.id)"
+                  >Delete</v-btn
+                >
+              </div>
+            </div>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
       <v-text-field
+        class="mt-6"
         label="保险号码"
         placeholder="MM/DD/YY"
         outlined
@@ -218,6 +320,10 @@
         Close
       </v-btn>
     </v-snackbar>
+    <!-- 保存成功提示 -->
+    <v-snackbar v-model="status" :timeout="statusTimeout" color="success">
+      {{ statusText }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -245,6 +351,7 @@ export default {
     menu2: false,
     menu3: false,
     notes: null,
+    dialog: false,
     property: {
       landlord: "",
       address: "",
@@ -276,11 +383,22 @@ export default {
     right: true,
     bottom: true,
     transition: "slide-y-reverse-transition",
-    // ====
+    // snackbar
     snackbar: false,
     text: "You are now in the edit mode",
     vertical: true,
     timeout: 0,
+    status: false,
+    statusTimeout: 2000,
+    statusText: "",
+    // dialog
+    rules: [(v) => !!v || "Name is required"],
+    valid: false,
+    newTenant: {
+      name: "",
+      telephone: "",
+      email: "",
+    },
   }),
 
   watch: {
@@ -371,6 +489,68 @@ export default {
       this.snackbar = true;
       this.clearable = true;
       console.log("edit");
+    },
+    async addNewTenant() {
+      if (this.$refs.form.validate()) {
+        try {
+          await this.$axios.post(
+            `/api/properties/${this.$route.query.id}/tenants`,
+            this.newTenant,
+            {
+              headers: {
+                Authorization: sessionStorage.getItem("auth"),
+              },
+            }
+          );
+          this.propertyDetail.tenants.push(this.newTenant);
+          this.statusText = "提交成功";
+          this.status = true;
+          this.getPropertyDetail();
+          this.dialog = false;
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    },
+    close() {
+      this.dialog = false;
+    },
+    async deleteTenant(index) {
+      try {
+        await this.$axios.delete(
+          `/api/properties/${this.$route.query.id}/tenants/${index}`,
+          {
+            headers: {
+              Authorization: sessionStorage.getItem("auth"),
+            },
+          }
+        );
+        this.propertyDetail.tenants.splice(
+          this.propertyDetail.tenants.findIndex((item) => item.id === index),
+          1
+        );
+        this.statusText = "删除成功";
+        this.status = true;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    async saveTenant(obj, index) {
+      try {
+        await this.$axios.put(
+          `/api/properties/${this.$route.query.id}/tenants/${obj.id}`,
+          { name: obj.name, email: obj.email, telephone: obj.telephone },
+          {
+            headers: {
+              Authorization: sessionStorage.getItem("auth"),
+            },
+          }
+        );
+        this.statusText = "修改成功";
+        this.status = true;
+      } catch (e) {
+        console.log(e);
+      }
     },
   },
 };

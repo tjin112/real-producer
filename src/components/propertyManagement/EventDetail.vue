@@ -136,6 +136,9 @@
         <v-btn color="primary" width="70%" @click="save()">save</v-btn>
       </v-col>
     </v-row>
+    <v-snackbar v-model="status" :timeout="statusTimeout" color="success">
+      {{ statusText }}
+    </v-snackbar>
   </div>
 </template>
 
@@ -173,6 +176,10 @@ export default {
     whCompanyTel: "",
     hfCompany: "",
     hfCompanyTel: "",
+    // 保存成功提示符
+    status: false,
+    statusTimeout: 2000,
+    statusText: "",
   }),
   watch: {
     insuranceExpiryReminders: {
@@ -187,7 +194,7 @@ export default {
         const [year, month, day] = this.adjustRentReminders.split("-");
         this.propertyDetail.adjustRentReminders = `${month}/${day}/${year}`;
       },
-    },
+    }
   },
   methods: {
     formatDate(date) {
@@ -234,10 +241,16 @@ export default {
             },
           }
         );
+        console.log(this.propertyDetail);
+        this.statusText = "保存成功";
+        this.status = true;
       } catch (e) {
         console.log(e);
       }
     },
+    // async saveTenants(){
+    //   await this.$axios.put(``)
+    // }
   },
 };
 </script>
